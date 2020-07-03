@@ -25,11 +25,8 @@ def get_maxima(out, freq):
 if __name__ == "__main__":
     
     #choose folder
-    folder = input("Long or short audio? ")
-    if folder == "long":
-        os.chdir("./long")
-    else:
-        os.chdir("./short")
+    folder = input("Which folder? ")
+    os.chdir("./"+folder)
     
     filename = input("Which file do you want? ")
     output = envelope(filename)
