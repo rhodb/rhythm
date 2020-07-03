@@ -7,7 +7,7 @@ import numpy as np
 #different processes as well
 def envelope(filename):
     rate, audiodata = wav.read(filename)
-    output = get_envelope(audiodata, rate, nsamples = 3, size = 40, filename)
+    output = get_envelope(filename, audiodata, rate, nsamples = 3, size = 40)
     #get the local maxima and their values... FINISH LATER
     #maxima_values = get_maxima(output, rate)
     
@@ -31,7 +31,8 @@ if __name__ == "__main__":
     filename = input("Which file do you want? ")
     output = envelope(filename)
     
-    np.savetxt(filename+"_smoothed", output, delimiter=',')
+    if output:
+        np.savetxt(filename+"_smoothed", output, delimiter=',')
 
     
     #clean up files from the function `envelope'

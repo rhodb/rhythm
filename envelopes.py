@@ -18,7 +18,7 @@ from playsound import playsound
 #computes does the envelope for a few pieces of the data at first to make sure 
 #the output is acceptable. If so, then it will proceed to compute it for the rest.
 
-def get_envelope(data, sfreq, nsamples = 5, size=5, filename):
+def get_envelope(filename, data, sfreq, nsamples = 5, size=5):
     #get the length of the audio data. then, get an upper limit on the interval 
     #of a sample chunk. then, only get a fraction of the upperlimit for sample
     n = len(data)
@@ -37,10 +37,13 @@ def get_envelope(data, sfreq, nsamples = 5, size=5, filename):
     for i in range(nsamples):
         l = interval_list[i][0]
         u = interval_list[i][1]
-        print("Interval you are listening to is " + str(l*(1/sfreq)) + " to " \
-              + str(u*(1/sfreq)) + " secs")
-        _, smooth = compute_envelope(data[l:u], sfreq, smooth, (l,u)) 
-        add_to_datafile(filename, data[l:u], smooth)
+        print("Interval you are listening to is " + str(l/sfreq) + " to " \
+              + str(u/sfreq) + " secs")
+        _, smooth = compute_envelope(data[l:u], sfreq, smooth, (l,u))
+        
+        #add chunk to data set if good
+        if input("Use as piece of data? ") == "y":
+            add_to_dataset(filename, data[l:u], smooth, (l/sfreq,u/sfreq))
 
     if input("Do complete signal? (y/n): ") == "y":
         output, _ = compute_envelope(data, sfreq, smooth, show=False)
@@ -102,11 +105,21 @@ def compute_envelope(d, fr, smoothparameter=5, interval = None, show=True):
 #This function will open the data file in the current directory to add bits 
 #of audio that have been labelled to an existing data set so that we can use 
 #it for downstream automated labelling
-def add_to_dataset(filename, data, label):
-    addition = (data, label, filename)
-    datafile = open("smoothing_data.txt", "a")
-    datafile.write(addition)
-    datafile.close()
+def add_to_dataset(filename, data, label, time):
+    audiofile = open("smoothing_data_audio.txt", "a")
+    labelfile = open("smoothing_data_labels.txt", "a")
+    
+    #use this so that we can write the arrays as rows and not columns
+    width = len(data)
+    data = np.reshape(data, (1,width))
+    
+    np.savetxt(audiofile, data, delimiter = ",", fmt="%d")
+    #audiofile.write(np.array2string(data, max_line_width = max_width)+"\n")
+    labelfile.write(str(label)+","+filename+","+str(time[0])+","+\
+                    str(time[1])+"\n")
+    
+    labelfile.close()
+    audiofile.close()
     
     return
     
